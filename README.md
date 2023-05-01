@@ -20,3 +20,15 @@ pip install -r requirements.txt
 ```shell
 python k8s-install.py
 ```
+
+![virtualenv-install](docs/img/k8s-virtualenv.gif)
+
+**VERIFIED EXECUTION**
+
+Forms 1.
+
+![virtualenv-install](docs/img/k8s-verified.gif)
+
+Forms 2.
+
+![virtualenv-install](docs/img/k8s-verified-2.gif)
