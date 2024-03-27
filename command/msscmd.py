@@ -20,10 +20,12 @@ docker_start = 'sudo systemctl start docker'
 docker_enabled = 'sudo systemctl enable docker'
 docker_group = 'sudo usermod -aG docker {user_os}'
 docker_version = 'docker --version'
-k8s_key_repository = 'https://packages.cloud.google.com/apt/doc/apt-key.gpg'
-k8s_repository = 'http://apt.kubernetes.io/ kubernetes-xenial'
-add_key_repository = 'curl -s {url} | sudo apt-key add'
-add_repository = 'sudo apt-add-repository \'deb {k8s_repository} main\' -y'
+k8s_key_repository = 'https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key'
+k8s_repository = 'https://pkgs.k8s.io/core:/stable:/v1.28/deb/'
+#k8s_repository = 'http://apt.kubernetes.io/ kubernetes-xenial'
+add_key_repository = 'sudo mkdir -p /etc/apt/keyrings/ && sudo curl -fsSL {url} | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg'
+#add_repository = 'sudo apt-add-repository \'deb {k8s_repository} main\' -y'
+add_repository = "echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] {k8s_repository} /' | sudo tee /etc/apt/sources.list.d/kubernetes.list"
 k8s_install = 'sudo apt-get install kubeadm kubelet kubectl -y'
 k8s_version = 'kubectl version'
 k8s_kubeadm_pull = 'sudo kubeadm config images pull'
@@ -79,7 +81,7 @@ def launch_vm(**kwargs):
     memory = '2G'
     cpus = '2'
     disk = '5G'
-    os = 'bionic'
+    os = 'focal'
 
     for key, value in kwargs.items():
         if key == 'vm_name' :

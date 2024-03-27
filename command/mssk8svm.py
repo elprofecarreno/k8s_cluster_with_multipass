@@ -1,13 +1,16 @@
 from command import msscmd as mu
 from tqdm import tqdm
 from command import cfglog
+from dotenv import load_dotenv
+import os
 
 LOG = cfglog.log()
+load_dotenv(dotenv_path="app.properties")
 
 master_k8s_name='master-k8s'
 workers_k8s_name='worker-{worker_id}-k8s'
-workers=2
-user_os= 'ubuntu'
+workers=int(os.getenv('WORKERS'))
+user_os= os.getenv('USER_OS')
 hosts = []
 nodes = []
 
@@ -22,7 +25,12 @@ def case_exec(index):
             LOG.info('CREATE VM WITH MULTIPASS...')
             # MASTER
             LOG.info('CREATE VM WITH MULTIPASS... %s', master_k8s_name)
-            mu.launch_vm(vm_name=master_k8s_name)
+            cpus = os.getenv('CPUS_MASTER')
+            memory = os.getenv('MEMORY_MASTER')
+            disk = os.getenv('DISK_MASTER')
+            ubuntu_os = os.getenv('UBUNTU_OS')
+
+            mu.launch_vm(vm_name=master_k8s_name, memory=memory, cpus=cpus, disk=disk, os=ubuntu_os)
             hosts.append(master_k8s_name)
         case 3:
             # WORKERS
@@ -31,7 +39,11 @@ def case_exec(index):
                 LOG.info('CREATE VM WITH MULTIPASS... %s', worker_name)
                 nodes.append(worker_name)
                 hosts.append(worker_name)
-                mu.launch_vm(vm_name=worker_name)
+                cpus = os.getenv('CPUS_WORKERS')
+                memory = os.getenv('MEMORY_WORKERS')
+                disk = os.getenv('DISK_WORKERS')
+                ubuntu_os = os.getenv('UBUNTU_OS')
+                mu.launch_vm(vm_name=worker_name, memory=memory, cpus=cpus, disk=disk, os=ubuntu_os)
             LOG.info('hosts: %s', hosts)
             LOG.info('nodes: %s', nodes)
         case 4:
