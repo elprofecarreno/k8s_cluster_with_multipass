@@ -2,6 +2,7 @@ from command import oscmd
 from datetime import datetime
 import time
 from command import cfglog
+import re
 
 LOG = cfglog.log()
 
@@ -40,8 +41,10 @@ k8s_cluster_join = 'sudo kubeadm token create --print-join-command'
 regular_user_k8s_mkdir = 'mkdir -p $HOME/.kube'
 regular_user_k8s_cp = 'sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config'
 regular_user_k8s_chown = 'sudo chown {user_os}:{user_os} $HOME/.kube/config'
-k8s_get_nodes = 'kubectl get nodes'
-k8s_red_node = 'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml'
+k8s_get_nodes = 'sleep 15 && kubectl get nodes'
+k8s_red_node_1 = 'curl -o kube-flannel.yml https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml'
+k8s_red_node_2 = "sed -i 's/10.244.0.0/{network}/' kube-flannel.yml"
+k8s_red_node_3 = 'kubectl apply -f kube-flannel.yml'
 
 # INSTALL MULTIPASS WITH SNAP
 def install_multipass_snap():
@@ -248,7 +251,25 @@ def regular_k8s_command(vm_name, user_os):
 def k8s_get_nodes_command(vm_name, user_os):
     exec_command_user(vm_name, k8s_get_nodes, user_os)
 
+def create_network_segment(ip):
+    patron_ip = re.compile(r"(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})")
+    # Encuentra los cuatro octetos de la dirección IP
+    match = patron_ip.search(ip)
+    if match:
+        octeto1 = match.group(1)
+        octeto2 = match.group(2)
+        #octeto3 = match.group(3)
+        #octeto4 = match.group(4)
+
+        # Reemplaza el tercer y cuarto octeto con los nuevos valores
+        network = f"{octeto1}.{octeto2}.0.0"
+        return network
+    else:
+        return None    
+
 # k8s CREATE RED NODE
-def k8s_red_node_command(vm_name, user_os):
-    exec_command_user(vm_name, k8s_red_node, user_os)
+def k8s_red_node_command(vm_name, user_os, ip):
+    exec_command_user(vm_name, k8s_red_node_1, user_os)
+    exec_command_user(vm_name, k8s_red_node_2.format(network=create_network_segment(ip)), user_os)
+    exec_command_user(vm_name, k8s_red_node_3, user_os)
     

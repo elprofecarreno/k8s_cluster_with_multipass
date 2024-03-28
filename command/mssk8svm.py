@@ -87,8 +87,9 @@ def case_exec(index):
 
         case 8:
             # CLUSTER CORRECTION
+            ip_master = mu.ip_vm_command(master_k8s_name)
             mu.regular_k8s_command(master_k8s_name, user_os)
-            mu.k8s_red_node_command(master_k8s_name, user_os)
+            mu.k8s_red_node_command(master_k8s_name, user_os, ip_master)
             mu.k8s_get_nodes_command(master_k8s_name, user_os)                                         
         case _:
             LOG.info('METHOD NOT SUPPORT')
