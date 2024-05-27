@@ -90,10 +90,19 @@ def case_exec(index):
             ip_master = mu.ip_vm_command(master_k8s_name)
             mu.regular_k8s_command(master_k8s_name, user_os)
             mu.k8s_red_node_command(master_k8s_name, user_os, ip_master)
-            mu.k8s_get_nodes_command(master_k8s_name, user_os)                                         
+            mu.k8s_get_nodes_command(master_k8s_name, user_os)
+
+        case 9:
+            # CLUSTER CORRECTION
+            nodes = ['worker-1-k8s', 'worker-2-k8s']
+            mu.k8s_copy_file(master_k8s_name, './deploy/example/hello-world.yaml', 'hello-world.yaml')
+            for node in nodes:
+                LOG.info(f'node: {node}')
+                mu.k8s_port_workers(node, 31515, user_os)
+                mu.k8s_app(node, 31515)         
         case _:
             LOG.info('METHOD NOT SUPPORT')
 
 def __main__():
-    for i in tqdm(range(0, 8), ncols = 100, desc ="Create Clust k8s: master + {0} nodes".format(workers)):
+    for i in tqdm(range(8, 9), ncols = 100, desc ="Create Clust k8s: master + {0} nodes".format(workers)):
         case_exec(i+1)

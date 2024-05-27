@@ -45,6 +45,7 @@ k8s_get_nodes = 'sleep 25 && kubectl get nodes'
 k8s_red_node_1 = 'curl -o kube-flannel.yml https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml'
 k8s_red_node_2 = "sed -i 's/10.244.0.0/{network}/' kube-flannel.yml"
 k8s_red_node_3 = 'kubectl apply -f kube-flannel.yml'
+k8s_copy_transfer = 'multipass transfer {path_file} {vm_name}:/home/ubuntu/{name_file}'
 
 # INSTALL MULTIPASS WITH SNAP
 def install_multipass_snap():
@@ -110,7 +111,7 @@ def launch_vm(**kwargs):
         LOG.error('error: %s', output.strip())
     time.sleep(1)
 
-# PRINT CORRECTION
+# PRINT CORRECTION+
 def print_correction(output):
         lines = output.split('\n')
         for line in lines:
@@ -273,3 +274,27 @@ def k8s_red_node_command(vm_name, user_os, ip):
     exec_command_user(vm_name, k8s_red_node_2.format(network=create_network_segment(ip)), user_os)
     exec_command_user(vm_name, k8s_red_node_3, user_os)
     
+# k8s COPY FILE IN VM
+def k8s_copy_file(vm_name, path_file, name_file):
+    k8s_transfer = k8s_copy_transfer.format(vm_name=vm_name, path_file=path_file, name_file=name_file)
+    LOG.info(f'{k8s_transfer}')
+    output = oscmd.exec_command([k8s_transfer])
+    output = output.strip().replace('\n', '')
+    LOG.info(output)    
+    exec_command(vm_name, f'sleep 25 && kubectl apply -f {name_file}')    
+    exec_command(vm_name, 'kubectl get pods')
+    exec_command(vm_name, 'kubectl get services')
+
+    
+# k8s PORT IN WORKERS MULTIPASS
+def k8s_port_workers(vm_name, port, user_os):
+    exec_command_user(vm_name, 'sudo ufw limit ssh', user_os)
+    exec_command_user(vm_name, f'sudo ufw allow {port}', user_os)
+    exec_command_user(vm_name, 'sudo ufw --force enable', user_os)
+
+def k8s_app(vm_name, port):
+    k8s_transfer = f'multipass list | grep {vm_name}| awk \'{{print $3}}\''
+    LOG.info(f'{k8s_transfer}')
+    output = oscmd.exec_command([k8s_transfer]).strip().replace('\n', '')
+    LOG.info(f'VERIFY http://{output}:{port}')
+
