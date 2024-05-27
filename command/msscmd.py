@@ -277,7 +277,7 @@ def k8s_red_node_command(vm_name, user_os, ip):
 # k8s COPY FILE IN VM
 def k8s_copy_file(vm_name, path_file, name_file, size_nodes):
     output = oscmd.exec_command([f'cat {path_file}/{name_file}'])
-    output = output.strip().replace('\n', '').replace('$NODES', str(size_nodes))
+    output = output.strip().replace('$NODES', str(size_nodes))
     output = oscmd.exec_command([f'echo "{output}" > {path_file}/copy-{name_file}'])
     k8s_transfer = k8s_copy_transfer.format(vm_name=vm_name, path_file=f'{path_file}/copy-{name_file}', name_file=f'copy-{name_file}')
     LOG.info(f'{k8s_transfer}')
