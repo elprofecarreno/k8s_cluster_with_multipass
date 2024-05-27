@@ -95,7 +95,7 @@ def case_exec(index):
         case 9:
             # CLUSTER CORRECTION
             #nodes = ['worker-1-k8s', 'worker-2-k8s']
-            mu.k8s_copy_file(master_k8s_name, './deploy/example/hello-world.yaml', 'hello-world.yaml')
+            mu.k8s_copy_file(master_k8s_name, './deploy/example', 'hello-world.yaml', len(nodes))
             for node in nodes:
                 LOG.info(f'node: {node}')
                 mu.k8s_port_workers(node, 31515, user_os)

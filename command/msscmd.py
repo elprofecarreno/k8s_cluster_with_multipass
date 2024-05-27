@@ -275,13 +275,16 @@ def k8s_red_node_command(vm_name, user_os, ip):
     exec_command_user(vm_name, k8s_red_node_3, user_os)
     
 # k8s COPY FILE IN VM
-def k8s_copy_file(vm_name, path_file, name_file):
-    k8s_transfer = k8s_copy_transfer.format(vm_name=vm_name, path_file=path_file, name_file=name_file)
+def k8s_copy_file(vm_name, path_file, name_file, size_nodes):
+    output = oscmd.exec_command([f'cat {path_file}/{name_file}'])
+    output = output.strip().replace('\n', '').replace('$NODES', str(size_nodes))
+    output = oscmd.exec_command([f'echo "{output}" > {path_file}/copy-{name_file}'])
+    k8s_transfer = k8s_copy_transfer.format(vm_name=vm_name, path_file=f'{path_file}/copy-{name_file}', name_file=f'copy-{name_file}')
     LOG.info(f'{k8s_transfer}')
     output = oscmd.exec_command([k8s_transfer])
     output = output.strip().replace('\n', '')
-    LOG.info(output)    
-    exec_command(vm_name, f'sleep 25 && kubectl apply -f {name_file}')    
+    LOG.info(output)   
+    exec_command(vm_name, f'sleep 25 && kubectl apply -f copy-{name_file}')    
     exec_command(vm_name, 'kubectl get pods')
     exec_command(vm_name, 'kubectl get services')
 
