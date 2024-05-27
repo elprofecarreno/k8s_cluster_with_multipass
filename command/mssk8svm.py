@@ -94,7 +94,7 @@ def case_exec(index):
 
         case 9:
             # CLUSTER CORRECTION
-            nodes = ['worker-1-k8s', 'worker-2-k8s']
+            #nodes = ['worker-1-k8s', 'worker-2-k8s']
             mu.k8s_copy_file(master_k8s_name, './deploy/example/hello-world.yaml', 'hello-world.yaml')
             for node in nodes:
                 LOG.info(f'node: {node}')
@@ -104,5 +104,5 @@ def case_exec(index):
             LOG.info('METHOD NOT SUPPORT')
 
 def __main__():
-    for i in tqdm(range(8, 9), ncols = 100, desc ="Create Clust k8s: master + {0} nodes".format(workers)):
+    for i in tqdm(range(0, 9), ncols = 100, desc ="Create Clust k8s: master + {0} nodes".format(workers)):
         case_exec(i+1)
