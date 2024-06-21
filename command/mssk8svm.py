@@ -19,7 +19,7 @@ def case_exec(index):
         case 1:
             # INSTALL MULTIPASS
             LOG.info('VERIFIED INSTALL MULTIPASS...')            
-            #mu.install_multipass_snap()
+            mu.install_multipass_snap()
         case 2:
             LOG.info('CREATE CLUSER KUBERNETES...')
             LOG.info('CREATE VM WITH MULTIPASS...')
@@ -29,7 +29,6 @@ def case_exec(index):
             memory = os.getenv('MEMORY_MASTER')
             disk = os.getenv('DISK_MASTER')
             ubuntu_os = os.getenv('UBUNTU_OS')
-
             mu.launch_vm(vm_name=master_k8s_name, memory=memory, cpus=cpus, disk=disk, os=ubuntu_os)
             hosts.append(master_k8s_name)
         case 3:
@@ -70,7 +69,7 @@ def case_exec(index):
             LOG.info('hosts: %s', hosts)
             for host in hosts:
                 LOG.info('CONFIG HOSTS WITH MULTIPASS... %s', host)
-                mu.add_hosts_command(host, ips_vms);
+                mu.add_hosts_command(host, ips_vms)
                 mu.verification_hosts_command(host, hosts)
                 LOG.info('DISABLED SWAP WITH MULTIPASS... %s', host)
                 mu.swap_command(host) 
@@ -84,14 +83,12 @@ def case_exec(index):
             for node in nodes:
                 LOG.info('JOIN NODE WITH MULTIPASS... %s', node)
                 mu.exec_command_user(node, join_cmd, user_os)               
-
         case 8:
             # CLUSTER CORRECTION
             ip_master = mu.ip_vm_command(master_k8s_name)
             mu.regular_k8s_command(master_k8s_name, user_os)
             mu.k8s_red_node_command(master_k8s_name, user_os, ip_master)
             mu.k8s_get_nodes_command(master_k8s_name, user_os)
-
         case 9:
             # CLUSTER CORRECTION
             #nodes = ['worker-1-k8s', 'worker-2-k8s']
@@ -99,10 +96,20 @@ def case_exec(index):
             for node in nodes:
                 LOG.info(f'node: {node}')
                 mu.k8s_port_workers(node, 31515, user_os)
-                mu.k8s_app(node, 31515)         
+                mu.k8s_app(node, 31515) 
+        case 10:
+            LOG.info('INSTALL NFS')
+            mu.install_nfs(master_k8s_name)
+            #master_ip = mu.ip_vm_command(master_k8s_name)
+            for node in nodes:
+                mu.install_nfs_client(node)
+                node_ip = mu.ip_vm_command(node)
+                mu.add_client_nfs(master_k8s_name, node_ip)
+            mu.restar_nfs(master_k8s_name)
+                
         case _:
             LOG.info('METHOD NOT SUPPORT')
 
 def __main__():
-    for i in tqdm(range(0, 9), ncols = 100, desc ="Create Clust k8s: master + {0} nodes".format(workers)):
+    for i in tqdm(range(0, 10), ncols = 100, desc ="Create Clust k8s: master + {0} nodes".format(workers)):
         case_exec(i+1)

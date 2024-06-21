@@ -46,6 +46,14 @@ k8s_red_node_1 = 'curl -o kube-flannel.yml https://raw.githubusercontent.com/cor
 k8s_red_node_2 = "sed -i 's/10.244.0.0/{network}/' kube-flannel.yml"
 k8s_red_node_3 = 'kubectl apply -f kube-flannel.yml'
 k8s_copy_transfer = 'multipass transfer {path_file} {vm_name}:/home/ubuntu/{name_file}'
+nfs_install = 'sudo apt install nfs-kernel-server -y'
+nfs_client = 'sudo apt install nfs-common -y'
+nfs_mkdir = 'sudo echo "" > /etc/exports'
+nfs_mkdir_data = 'sudo mkdir -p /data'
+nfs_chown_data = 'sudo chown -R nobody:nogroup /data'
+nfs_add_client = 'sudo echo "/data {ip_vm}(rw,sync,no_root_squash,no_subtree_check)" >> /etc/exports'
+nfs_ufw_client = 'sudo ufw allow from {ip_vm} to any port nfs'
+nfs_restart = 'sudo systemctl restart nfs-kernel-server'
 
 # INSTALL MULTIPASS WITH SNAP
 def install_multipass_snap():
@@ -288,7 +296,6 @@ def k8s_copy_file(vm_name, path_file, name_file, size_nodes):
     exec_command(vm_name, 'kubectl get pods')
     exec_command(vm_name, 'kubectl get services')
 
-    
 # k8s PORT IN WORKERS MULTIPASS
 def k8s_port_workers(vm_name, port, user_os):
     exec_command_user(vm_name, 'sudo ufw limit ssh', user_os)
@@ -301,3 +308,18 @@ def k8s_app(vm_name, port):
     output = oscmd.exec_command([k8s_transfer]).strip().replace('\n', '')
     LOG.info(f'VERIFY http://{output}:{port}')
 
+def install_nfs(vm_name):
+    exec_command(vm_name, nfs_install)
+    exec_command(vm_name, nfs_mkdir)
+    exec_command(vm_name, nfs_mkdir_data)
+    exec_command(vm_name, nfs_chown_data)
+
+def install_nfs_client(vm_name):
+    exec_command(vm_name, nfs_client)    
+        
+def add_client_nfs(vm_name, ip_vm):
+    exec_command(vm_name, nfs_add_client.format(ip_vm=ip_vm))
+    exec_command(vm_name, nfs_ufw_client.format(ip_vm=ip_vm))    
+
+def restar_nfs(vm_name):
+    exec_command(vm_name, nfs_restart)
