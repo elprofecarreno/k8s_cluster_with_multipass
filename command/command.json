@@ -34,7 +34,7 @@
                             "parameters": {
                                 "vm_name": "master-k8s",
                                 "memory": "2G",
-                                "cpus": "1",
+                                "cpus": "2",
                                 "disk": "15G",
                                 "os": "focal"
                             }
@@ -154,6 +154,27 @@
                         {
                             "message": "MASTER VM SWAPOFF",
                             "command": "multipass exec {vm_name} -- bash -c \"sudo swapoff -a\"",
+                            "parameters": {
+                                "vm_name": "master-k8s"
+                            }
+                        },
+                        {
+                            "message": "MASTER VM FIND RED",
+                            "command": "multipass list | grep {vm_name} | awk '{{split($3, ip, \".\"); print ip[1]\".\"ip[2]\".0.0\"}}' > temp.txt",
+                            "parameters": {
+                                "vm_name": "master-k8s"
+                            }
+                        },
+                        {
+                            "message": "MASTER VM COPY TEMP",
+                            "command": "multipass transfer temp.txt {vm_name}:/home/ubuntu",
+                            "parameters": {
+                                "vm_name": "master-k8s"
+                            }
+                        },
+                        {
+                            "message": "MASTER VM DEFINED POD NETWORK",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo kubeadm init --pod-network-cidr=\\$(cat /home/ubuntu/temp.txt)/16\" > joinfile.txt",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
