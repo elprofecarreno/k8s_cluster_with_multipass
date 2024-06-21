@@ -141,10 +141,15 @@
                         },
                         {
                             "message": "MASTER ADD HOST + IP IN TABLE HOST",
-                            "command": "multipass exec master-k8s -- bash -c \"sudo cat /home/ubuntu/temp.txt | sudo tee /etc/hosts > /dev/null && sudo cat /etc/hosts && rm /home/ubuntu/temp.txt\"",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo cat /home/ubuntu/temp.txt | sudo tee -a /etc/hosts > /dev/null && sudo cat /etc/hosts && rm /home/ubuntu/temp.txt\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
+                        },
+                        {
+                            "message": "MASTER VM DELETE TEMP HOST + IP",
+                            "command": "rm temp.txt",
+                            "parameters": {}
                         }
                     ]
                 },
@@ -268,10 +273,15 @@
                         },
                         {
                             "message": "WORKER 1 ADD HOST + IP IN TABLE HOST",
-                            "command": "multipass exec master-k8s -- bash -c \"sudo cat /home/ubuntu/temp2.txt | sudo tee /etc/hosts > /dev/null && sudo cat /etc/hosts && rm /home/ubuntu/temp2.txt\"",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo cat /home/ubuntu/temp2.txt | sudo tee -a /etc/hosts > /dev/null && sudo cat /etc/hosts && rm /home/ubuntu/temp2.txt\"",
                             "parameters": {
                                 "vm_name": "worker-1-k8s"
                             }
+                        },
+                        {
+                            "message": "WORKER 1 VM DELETE TEMP HOST + IP",
+                            "command": "rm temp2.txt",
+                            "parameters": {}
                         }
                     ]
                 },
@@ -395,10 +405,15 @@
                         },
                         {
                             "message": "WORKER 2 ADD HOST + IP IN TABLE HOST",
-                            "command": "multipass exec master-k8s -- bash -c \"sudo cat /home/ubuntu/temp3.txt | sudo tee /etc/hosts > /dev/null && sudo cat /etc/hosts && rm /home/ubuntu/temp3.txt\"",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo cat /home/ubuntu/temp3.txt | sudo tee -a /etc/hosts > /dev/null && sudo cat /etc/hosts && rm /home/ubuntu/temp3.txt\"",
                             "parameters": {
                                 "vm_name": "worker-2-k8s"
                             }
+                        },
+                        {
+                            "message": "WORKER 2 VM DELETE TEMP HOST + IP",
+                            "command": "rm temp3.txt",
+                            "parameters": {}
                         }
                     ]
                 }
