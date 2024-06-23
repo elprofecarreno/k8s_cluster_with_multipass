@@ -303,15 +303,7 @@
                             "parameters": {
                                 "vm_name": "worker-1-k8s"
                             }
-                        },
-                        {
-                            "message": "WORKER 1 VM INSTALL NFS CLIENT",
-                            "command": "multipass exec {vm_name} -- bash -c \"sudo apt-get install -y nfs-common\"",
-                            "parameters": {
-                                "vm_name": "worker-1-k8s"
-                            }
                         }
-
                     ]
                 },
                 {
@@ -450,13 +442,6 @@
                             "parameters": {
                                 "vm_name": "worker-2-k8s"
                             }
-                        },
-                        {
-                            "message": "WORKER 2 VM INSTALL NFS CLIENT",
-                            "command": "multipass exec {vm_name} -- bash -c \"sudo apt-get install -y nfs-common\"",
-                            "parameters": {
-                                "vm_name": "worker-2-k8s"
-                            }
                         }
                     ]
                 }
@@ -540,7 +525,7 @@
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
-                        },
+                        }
                         {
                             "message": "MASTER ADD IP FIREWALL CLIENT NFS",
                             "command": "multipass exec {vm_name} -- bash -c \"sudo ufw allow from worker-1-k8s to any port nfs\"",
@@ -597,7 +582,7 @@
                         },
                         {
                             "message": "MASTER DEPLOY NGINX",
-                            "command": "multipass exec {vm_name} -- bash -c \"kubectl apply -f /home/ubuntu/hello-world.yaml && sleep 30s && kubectl -n default get pods\"",
+                            "command": "multipass exec {vm_name} -- bash -c \"kubectl apply -f /home/ubuntu/hello-world.yaml\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
