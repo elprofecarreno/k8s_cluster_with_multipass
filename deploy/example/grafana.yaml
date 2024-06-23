@@ -8,7 +8,7 @@ spec:
   accessModes:
     - ReadWriteMany
   nfs:
-    path: /data/nginx
+    path: /data/grafana
     server: master-k8s
 ---
 apiVersion: v1
@@ -25,24 +25,24 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-world
+  name: grafana
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: hello-world
+      app: grafana
   template:
     metadata:
       labels:
-        app: hello-world
+        app: grafana
     spec:
       containers:
-      - name: hello-world
-        image: nginx:latest
+      - name: grafana
+        image: grafana/grafana:10.4.4
         ports:
-        - containerPort: 80
+        - containerPort: 3000
         volumeMounts:
-        - mountPath: /usr/share/nginx/html
+        - mountPath: /var/lib/grafana
           name: nfs-storage
       volumes:
       - name: nfs-storage
@@ -52,13 +52,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hello-world-service
+  name: grafana-service
 spec:
   selector:
-    app: hello-world
+    app: grafana
   ports:
     - protocol: TCP
       port: 31515
-      targetPort: 80
+      targetPort: 3000
       nodePort: 31515
   type: NodePort

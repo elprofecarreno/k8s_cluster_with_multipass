@@ -159,8 +159,15 @@
                             }
                         },
                         {
-                            "message": "MASTER VM INSTALL NFS SERVER + SHARE FOLDER",
-                            "command": "multipass exec {vm_name} -- bash -c \"sudo apt install nfs-kernel-server -y && sudo echo \"\" > /etc/exports && sudo mkdir -p /data/nginx && sudo chown -R nobody:nogroup /data\"",
+                            "message": "MASTER VM SHARE FOLDER",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo mkdir -p /data/grafana && sudo chown -R nobody:nogroup /data && sudo chmod 777 -R /data\"",
+                            "parameters": {
+                                "vm_name": "master-k8s"
+                            }
+                        },
+                        {
+                            "message": "MASTER VM INSTALL NFS SERVER",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo apt install nfs-kernel-server -y && sudo echo \"\" > /etc/exports\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
@@ -311,7 +318,6 @@
                                 "vm_name": "worker-1-k8s"
                             }
                         }
-
                     ]
                 },
                 {
@@ -543,14 +549,14 @@
                         },
                         {
                             "message": "MASTER ADD IP FIREWALL CLIENT NFS",
-                            "command": "multipass exec {vm_name} -- bash -c \"sudo ufw allow from worker-1-k8s to any port nfs\"",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo ufw allow from $(multipass list | grep worker-1-k8s | awk '{{print $3}}') to any port nfs\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
                         },
                         {
                             "message": "MASTER ADD IP FIREWALL CLIENT NFS",
-                            "command": "multipass exec {vm_name} -- bash -c \"sudo ufw allow from worker-2-k8s to any port nfs\"",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo ufw allow from $(multipass list | grep worker-2-k8s | awk '{{print $3}}') to any port nfs\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
@@ -589,15 +595,29 @@
                             }
                         },
                         {
-                            "message": "MASTER COPY YAML NGINX",
-                            "command": "multipass transfer deploy/example/hello-world.yaml {vm_name}:/home/ubuntu/hello-world.yaml",
+                            "message": "MASTER COPY YAML grafana",
+                            "command": "multipass transfer deploy/example/grafana.yaml {vm_name}:/home/ubuntu/grafana.yaml",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
                         },
                         {
-                            "message": "MASTER DEPLOY NGINX",
-                            "command": "multipass exec {vm_name} -- bash -c \"kubectl apply -f /home/ubuntu/hello-world.yaml && sleep 30s && kubectl -n default get pods\"",
+                            "message": "MASTER DEPLOY GRAFANA",
+                            "command": "multipass exec {vm_name} -- bash -c \"kubectl apply -f /home/ubuntu/grafana.yaml && sleep 30s && kubectl -n default get pods\"",
+                            "parameters": {
+                                "vm_name": "master-k8s"
+                            }
+                        },
+                        {
+                            "message": "VERIFIED GRAFANA",
+                            "command": "echo \"http://$(multipass list | grep worker-1-k8s | awk '{{print $3}}'):31515\"",
+                            "parameters": {
+                                "vm_name": "master-k8s"
+                            }
+                        },
+                        {
+                            "message": "VERIFIED GRAFANA",
+                            "command": "echo \"http://$(multipass list | grep worker-2-k8s | awk '{{print $3}}'):31515\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
