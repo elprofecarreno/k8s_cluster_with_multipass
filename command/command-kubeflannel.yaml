@@ -160,7 +160,7 @@
                         },
                         {
                             "message": "MASTER VM SHARE FOLDER",
-                            "command": "multipass exec {vm_name} -- bash -c \"sudo mkdir -p /data/grafana && sudo mkdir -p /data/storageClass && sudo chown -R nobody:nogroup /data && sudo chmod 777 -R /data\"",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo mkdir -p /data/grafana && sudo chown -R nobody:nogroup /data && sudo chmod 777 -R /data\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
@@ -168,13 +168,6 @@
                         {
                             "message": "MASTER VM INSTALL NFS SERVER",
                             "command": "multipass exec {vm_name} -- bash -c \"sudo apt install nfs-kernel-server -y && sudo echo \"\" > /etc/exports\"",
-                            "parameters": {
-                                "vm_name": "master-k8s"
-                            }
-                        },
-                        {
-                            "message": "MASTER VM INSTALL HELM",
-                            "command": "multipass exec {vm_name} -- bash -c \"sudo snap install helm --classic\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
@@ -498,7 +491,7 @@
                         },
                         {
                             "message": "MASTER VM DEFINED POD NETWORK",
-                            "command": "multipass exec {vm_name} -- bash -c \"sudo kubeadm init --pod-network-cidr=192.168.0.0/16\" > joinfile.txt",
+                            "command": "multipass exec {vm_name} -- bash -c \"sudo kubeadm init --pod-network-cidr=\\$(cat /home/ubuntu/temp.txt)/16\" > joinfile.txt",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
@@ -576,15 +569,15 @@
                             }
                         },
                         {
-                            "message": "MASTER INSTALL TIGERA",
-                            "command": "multipass exec {vm_name} -- bash -c \"kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.1/manifests/tigera-operator.yaml\"",
+                            "message": "MASTER DOWNLOAD KUBEFLANNEL",
+                            "command": "multipass exec {vm_name} -- bash -c \"curl -o kube-flannel.yml https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
                         },
                         {
-                            "message": "MASTER INSTALL CALICO YAML",
-                            "command": "multipass exec {vm_name} -- bash -c \"kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.1/manifests/custom-resources.yaml\"",
+                            "message": "MASTER EDIT KUBEFLANNEL YAML",
+                            "command": "multipass exec {vm_name} -- bash -c \"sed -i \"s/10.244.0.0/$(cat temp.txt | tr -d '\n')/\" kube-flannel.yml\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
@@ -595,36 +588,8 @@
                             "parameters": {}
                         },
                         {
-                            "message": "MASTER LIST CALICO IN KUBERNETES CLUSTER",
-                            "command": "multipass exec {vm_name} -- bash -c \"sleep 10s && kubectl get pods -n calico-system\"",
-                            "parameters": {
-                                "vm_name": "master-k8s"
-                            }
-                        },
-                        {
-                            "message": "MASTER REMOVE TIGERA IN KUBERNETES CLUSTER",
-                            "command": "multipass exec {vm_name} -- bash -c \"sleep 10s && kubectl taint nodes --all node-role.kubernetes.io/control-plane-\"",
-                            "parameters": {
-                                "vm_name": "master-k8s"
-                            }
-                        },
-                        {
-                            "message": "MASTER LIST NODES IN KUBERNETES CLUSTER",
-                            "command": "multipass exec {vm_name} -- bash -c \"sleep 2s && kubectl get nodes -o wide\"",
-                            "parameters": {
-                                "vm_name": "master-k8s"
-                            }
-                        },
-                        {
-                            "message": "MASTER VM ADD NFS OPERATOR",
-                            "command": "multipass exec {vm_name} -- bash -c \"helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/\"",
-                            "parameters": {
-                                "vm_name": "master-k8s"
-                            }
-                        },
-                        {
-                            "message": "MASTER VM ADD NFS OPERATOR",
-                            "command": "multipass exec {vm_name} -- bash -c \"helm install nfs-dynamic-client-standard nfs-subdir-external-provisioner/nfs-subdir-external-provisioner --set nfs.server=master-k8s --set nfs.path=/data --set storageClass.provisionerName=k8s-sigs.io/second-nfs-subdir-external-provisioner --set storageClass.onDelete=false && sleep 10s\"",
+                            "message": "MASTER INSTALL KUBEFLANNEL IN KUBERNETES CLUSTER",
+                            "command": "multipass exec {vm_name} -- bash -c \"kubectl apply -f kube-flannel.yml && sleep 30s && kubectl get nodes -o wide\"",
                             "parameters": {
                                 "vm_name": "master-k8s"
                             }
